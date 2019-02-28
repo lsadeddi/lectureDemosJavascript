@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Electric Dreams</title>
+
+	<style type="text/css">
+		/*style the computer text, input, and button*/
+		body {
+			font-family: monospace;
+			font-size: 2em;
+			background-color: #3c3c3c;
+		}
+		button {
+			display: none;
+		}
+		input{
+			font-size: 1em;
+			font-family: monospace;
+		}
+		.red { color: red;}
+		.green {color: rgb(74, 247, 31);}
+		h1{color: white;}
+		main{
+			width:50%;
+			margin: 1em auto;
+			padding: 1em 1em 2em 1em;
+			border-radius: 50px;
+			border: 3px solid rgb(74, 247, 31);
+			background-color: rgb(32, 66, 36);
+		}
+	</style>
+</head>
+
+<body>
+	<main>
+		<h1>Electric Dreams</h1>
+		<p id="computer" class="green">Hi, how are you today?</p>
+		<input id="human" type="text" placeholder="Type your response...">
+		<button>Enter</button>
+		<button>Exit</button>
+
+	</main>
+
+	<script type="text/javascript">
+    const computer = document.querySelector('#computer')
+		const human = document.getElementById('human')
+		const button = document.getElementsByTagName('button')[0]
+
+		button.addEventListener('click', clickHandler)
+
+		function clickHandler(){
+			//do something
+			// computer.innerHTML = human.value
+			playGame()
+		}
+		window.addEventListener("keydown", keydownHandler)
+		function keydownHandler(event){
+			if (event.keyCode == 13 || event.keyCode == 10){
+				//do something
+				// computer.innerHTML = human.value
+				playGame();
+			}
+		}
+
+		let randomResponses = [
+			"I hate you.",
+			"You are my best friend.",
+			"Maybe we should stop talking.",
+			"The sky is blue."
+		]
+
+		function playGame() {
+			//do something for real
+			//tired, sleepy, exhausted
+			let humanMessage = (human.value).toLowerCase()
+			if (humanMessage.indexOf("tired") !== -1) {
+				computer.innerHTML = "You better get some sleep."
+			} else if (humanMessage.indexOf("sleepy") !== -1) {
+				computer.innerHTML = "You must know Snow White."
+			} else if (humanMessage.indexOf("exhausted") !== -1) {
+				computer.innerHTML = "You should get a bite to eat."
+			} else {
+				//
+				if (randomResponses.length > 0){
+					//show the random answer
+					const ranNum = Math.floor(Math.random()*randomResponses.length)
+					console.log(ranNum);
+					computer.innerHTML = randomResponses[ranNum]
+					randomResponses.splice(ranNum, 1)
+				} else {
+					//go someplace else
+					location.assign("https://giphy.com/gifs/dog-roll-over-gifs-1W62t8wP8m1iM")
+				}
+			}
+			human.value = ""
+		}
+
+
+
+
+
+
+
+
+
+
+	</script>
+</body>
+
+</html>
