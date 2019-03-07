@@ -20,6 +20,9 @@
 		}
 		.red { color: red;}
 		.green {color: rgb(74, 247, 31);}
+		.blueBG { background-color: blue;}
+		.redBG { background-color: red;}
+
 		h1{color: white;}
 		main{
 			width:50%;
@@ -29,6 +32,7 @@
 			border: 3px solid rgb(74, 247, 31);
 			background-color: rgb(32, 66, 36);
 		}
+		.displayNone { display: none;}
 	</style>
 </head>
 
@@ -42,13 +46,17 @@
 
 	</main>
 
+	<iframe width="560" height="315" src="https://www.youtube.com/embed/oD1vbhicJUY" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen class = "displayNone"></iframe>
+
 	<script type="text/javascript">
     const computer = document.querySelector('#computer')
 		const human = document.getElementById('human')
 		const button = document.getElementsByTagName('button')[0]
+		const main = document.querySelector('main')
 
 		let computerMsg = ""
 		let humanMsg = ""
+		let questionTrack = "start"
 
 		button.addEventListener('click', clickHandler)
 
@@ -75,41 +83,105 @@
 
 		function playGame() {
 			//analyze input
-			//do something for real
-			//tired, sleepy, exhausted
 			humanMsg = (human.value).toLowerCase()
 
-			if (humanMsg.indexOf("tired") !== -1) {
-				computerMsg = "You better get some sleep."
-			} else if (humanMsg.indexOf("sleepy") !== -1) {
-				computerMsg = "You must know Snow White."
-			} else if (humanMsg.indexOf("exhausted") !== -1) {
-				computerMsg = "You should get a bite to eat."
+			if (questionTrack == "start"){
+				startEval()
+			} else if (questionTrack == "color"){
+				colorEval()
+			} else if (questionTrack == "fight"){
+				fightEval()
+			} else if (questionTrack == "sad"){
+				sadEval()
+			} else if (questionTrack == "dog"){
+				dogEval()
+			} else if (questionTrack == "dogOwner"){
+				dogOwnerEval()
+			} else if (questionTrack == "cat"){
+				catEval()
 			} else {
-				//
 				genericResponse()
-			}//end if
+			}
 
 			//update text on screen
 			computer.innerHTML = computerMsg
 			human.value = ""
 		}//end playGame
 
+		function startEval(){
+			if (humanMsg.indexOf("good") !== -1){
+				computerMsg = "Glad to hear that. What is your favorite color?"
+				questionTrack = "color"
+			} else if (humanMsg.indexOf("bad") !== -1){
+				computerMsg = "You sound depressed. Do you like dogs?"
+				questionTrack = "dog"
+			} else {
+				genericResponse()
+			}//end if
+		}//end startEval
+
+		function colorEval(){
+			main.style.backgroundColor = humanMsg
+
+			if (humanMsg.indexOf("red") !== -1){
+				computerMsg = "You must have a temper. Do you want to fight?"
+				questionTrack = "fight"
+				// main.classList.add("redBG")
+			} else if (humanMsg.indexOf("blue") !== -1 || humanMsg.indexOf("teal")){
+				computerMsg = "I thought you said you were feeling good. Are you sure you are not sad?"
+				questionTrack = "sad"
+				// main.classList.add("blueBG")
+			} else {
+				genericResponse()
+			}//end if
+		}//end colorEval
+
+		function dogEval(){
+			if (humanMsg.indexOf("yes") !== -1){
+				computerMsg = "Wonderful! Do you have a dog?"
+				questionTrack = "dogOwner"
+			} else if (humanMsg.indexOf("no") !== -1){
+				computerMsg = "Too bad. Are you a cat person?"
+				questionTrack = "cat"
+			} else {
+				genericResponse()
+			}//end if
+		}//end dogEval
+
+		function fightEval(){
+
+		}//end fightEval
+
+		function sadEval(){
+
+		}//end sadEval
+
+		function dogOwnerEval(){
+
+		}//end dogOwnerEval
+
+		function catEval(){
+
+		}//end catEval
+
+
 		function genericResponse(){
 			if (randomResponses.length > 0){
 				//show the random answer
 				const ranNum = Math.floor(Math.random()*randomResponses.length)
 				// console.log(ranNum);
-				computer.innerHTML = randomResponses[ranNum]
+				computerMsg = randomResponses[ranNum]
 				randomResponses.splice(ranNum, 1)
 			} else {
-				endGame()
+				computerMsg = "I am done with you puny human."
+				human.className = "displayNone"
+				setTimeout(endGame, 2000)
 			}
 		}//end generic
 
 		function endGame(){
 			//go someplace else
-			location.assign("https://giphy.com/gifs/dog-roll-over-gifs-1W62t8wP8m1iM")
+			location.assign("https://youtu.be/oD1vbhicJUY")
 		}//end endGame
 
 
