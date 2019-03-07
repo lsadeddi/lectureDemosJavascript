@@ -47,6 +47,9 @@
 		const human = document.getElementById('human')
 		const button = document.getElementsByTagName('button')[0]
 
+		let computerMsg = ""
+		let humanMsg = ""
+
 		button.addEventListener('click', clickHandler)
 
 		function clickHandler(){
@@ -61,7 +64,7 @@
 				// computer.innerHTML = human.value
 				playGame();
 			}
-		}
+		}//end keydownHandler
 
 		let randomResponses = [
 			"I hate you.",
@@ -71,32 +74,43 @@
 		]
 
 		function playGame() {
+			//analyze input
 			//do something for real
 			//tired, sleepy, exhausted
-			let humanMessage = (human.value).toLowerCase()
-			if (humanMessage.indexOf("tired") !== -1) {
-				computer.innerHTML = "You better get some sleep."
-			} else if (humanMessage.indexOf("sleepy") !== -1) {
-				computer.innerHTML = "You must know Snow White."
-			} else if (humanMessage.indexOf("exhausted") !== -1) {
-				computer.innerHTML = "You should get a bite to eat."
+			humanMsg = (human.value).toLowerCase()
+
+			if (humanMsg.indexOf("tired") !== -1) {
+				computerMsg = "You better get some sleep."
+			} else if (humanMsg.indexOf("sleepy") !== -1) {
+				computerMsg = "You must know Snow White."
+			} else if (humanMsg.indexOf("exhausted") !== -1) {
+				computerMsg = "You should get a bite to eat."
 			} else {
 				//
-				if (randomResponses.length > 0){
-					//show the random answer
-					const ranNum = Math.floor(Math.random()*randomResponses.length)
-					console.log(ranNum);
-					computer.innerHTML = randomResponses[ranNum]
-					randomResponses.splice(ranNum, 1)
-				} else {
-					//go someplace else
-					location.assign("https://giphy.com/gifs/dog-roll-over-gifs-1W62t8wP8m1iM")
-				}
-			}
+				genericResponse()
+			}//end if
+
+			//update text on screen
+			computer.innerHTML = computerMsg
 			human.value = ""
-		}
+		}//end playGame
 
+		function genericResponse(){
+			if (randomResponses.length > 0){
+				//show the random answer
+				const ranNum = Math.floor(Math.random()*randomResponses.length)
+				// console.log(ranNum);
+				computer.innerHTML = randomResponses[ranNum]
+				randomResponses.splice(ranNum, 1)
+			} else {
+				endGame()
+			}
+		}//end generic
 
+		function endGame(){
+			//go someplace else
+			location.assign("https://giphy.com/gifs/dog-roll-over-gifs-1W62t8wP8m1iM")
+		}//end endGame
 
 
 
