@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>FAQ</title>
+  <style type="text/css">
+    body {
+      background-color: #555;
+      position: relative;
+    }
+
+    * {
+      border: 1px solid red;
+    }
+
+    h1 {
+      color: rgb(159, 13, 153);
+    }
+
+    h2 {
+      padding: 0 0 0 60px;
+      cursor: pointer;
+      height: 40px;
+      color: rgb(155, 233, 233);
+      background: url('http://place-puppy.com/40x40') no-repeat;
+    }
+
+    section {
+      margin: 10px;
+      padding: 10px;
+      background-color: #999;
+    }
+
+    .close {
+      background: url('http://placekitten.com/40/40') no-repeat;
+    }
+
+    .answer {
+      background-color: rgb(244, 83, 232);
+      text: #000;
+      overflow: hidden;
+      transition: all 0.3s ease-in;
+    }
+  </style>
+
+</head>
+
+<body>
+  <h1>FAQ</h1>
+  <main>
+    <section>
+      <h2 class="close">First question.</h2>
+      <p class="answer">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+        consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+    </section>
+    <section>
+      <h2 class="close">Second question.</h2>
+      <p class="answer">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+        consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+    </section>
+    <section>
+      <h2 class="close">Third question.</h2>
+      <p class="answer">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+        consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+    </section>
+    <section>
+      <h2 class="close">Fourth question.</h2>
+      <p class="answer">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+        consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+    </section>
+    <section>
+      <h2 class="close">Fifth question.</h2>
+      <p class="answer">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+        consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+    </section>
+  </main>
+
+  <script type="text/javascript">
+    const main = document.querySelector('main')
+    const questions = main.querySelectorAll('h2')
+    const answers = main.querySelectorAll('section p')
+    // console.log(answers);
+    answers.forEach(item => {
+      item.style.opacity = 0
+      item.style.maxHeight = 0
+    })
+
+    questions.forEach(question =>{
+      question.addEventListener('click', clickOn)
+    })
+
+    function clickOn(e){
+      const clickedQuestion = e.currentTarget
+      const clickedAnswer = clickedQuestion.nextElementSibling
+
+      answers.forEach(answer => {
+        // if (!answer.classList.contains('closed') && answer !== clickedAnswer){
+          answer.style.maxHeight = 0
+          answer.style.opacity = 0
+        // }
+      })
+      questions.forEach(question =>{
+        if (!question.classList.contains('close') && question !== clickedQuestion){
+          question.classList.toggle('close')
+        }
+      })
+
+      //handle clicked question
+      if (clickedQuestion.classList.contains('close')){
+        //slide down
+        clickedAnswer.style.maxHeight = clickedAnswer.scrollHeight + "px"
+        clickedAnswer.style.opacity = 1
+      } else {
+        //slide up
+        clickedAnswer.style.maxHeight = 0
+        clickedAnswer.style.opacity = 0
+      }
+      clickedQuestion.classList.toggle('close')
+    }
+    // function main(){
+    //
+    //   //hide all the answers
+    //   $(".answer").hide();
+    //
+    //   $("main h2").click((e) => {
+    //     if ($(e.currentTarget).next('.answer').is(':hidden')) {
+    //       $('.answer').filter(':visible').slideUp()
+    //       $('main h2').addClass('close')
+    //
+    //       $(e.currentTarget).next('.answer').slideDown();
+    //     } else {
+    //       $(e.currentTarget).next('.answer').slideUp();
+    //     }
+    //     $(e.currentTarget).toggleClass("close");
+    //
+    //   }) //end of click function
+    // } // end of main()
+    // $(document).ready(main)
+
+  </script>
+</body>
+
+</html>
