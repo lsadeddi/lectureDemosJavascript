@@ -113,12 +113,13 @@
 
         $('.overlay').append('<img src = "' + imagePath + '" class = "big">')
         $('.big').on('load', function(){
+          resizeImage()
           //use the size data from the image to postition the controls
-          $('#controls').css('width', $('.big').width())
-          $('#cap').css({
-            width: $('.big').width(),
-            top: $('.big').height()/2 - $('#cap').height() + $('.controlButton').height()/2
-          })//end css stuff
+          // $('#controls').css('width', $('.big').width())
+          // $('#cap').css({
+          //   width: $('.big').width(),
+          //   top: $('.big').height()/2 - $('#cap').height() + $('.controlButton').height()/2
+          //})//end css stuff
         })//end load image
 
 
@@ -182,12 +183,50 @@
       })
 
       function resizeImage(){
+        $('.big').css('width', "")
+        $('.big').css('height', "")
+
         const cHeight = $(window).height()
         const cWidth = $(window).width()
         const iHeight = $('.big').height()
         const iWidth = $('.big').width()
         let ratio = 1
-        
+
+        let newHeight;
+        let newWidth;
+
+        if (iHeight >= iWidth){
+          //image is portrait
+          newHeight = cHeight * 0.9
+          ratio = cHeight / iHeight
+          newWidth = iWidth * ratio
+          if (newWidth > cWidth * 0.9) {
+            ratio = cWidth / newWidth
+            newWidth = cWidth * 0.9
+            newHeight *= ratio
+          }
+        } else if (iHeight < iWidth) {
+          //image is landscape
+          newWidth = cWidth * 0.9
+          ratio = cWidth / iWidth
+          newHeight = iHeight * ratio
+          if (newHeight > cHeight * 0.9) {
+              ratio = cHeight / newHeight
+              newHeight = cHeight * 0.9
+              newWidth *= ratio
+            }
+        } else {
+          console.log("Something went wrong during resize");
+        }
+        $('.big').css({
+          height: newHeight,
+          width: newWidth
+        })
+        $('#controls').css('width', newWidth)
+        $('#cap').css({
+          top: newHeight / 2 - $('#cap').height() + $('.controlButton').height()/2,
+          width: newWidth
+        })
       }
 
 
