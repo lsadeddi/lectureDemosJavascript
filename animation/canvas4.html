@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>canvas</title>
+    <style type="text/css">
+    * {
+        margin: 0;
+        padding: 0;
+    }
+    canvas {
+        background-color: red;
+    }
+    </style>
+</head>
+
+<body>
+    <canvas id="canvas"></canvas>
+    <script type="text/javascript">
+    const canvas = document.querySelector('#canvas');
+    canvas.width = 600;
+    canvas.height = 400;
+    const context = canvas.getContext('2d');
+    const image = new Image();
+    image.addEventListener('load', draw, false);
+    image.src = 'assets/elfAtlas.png';
+
+    let Elf = {
+      sx: 0,
+      sy: 0,
+      dx: Math.random()*580,
+      dy: Math.random()*380,
+      spriteW: 53,
+      spriteH: 63,
+      //new vars
+      speedY: 0,
+      currentFrame: 0,
+      frames: 12,
+      cols: 4,
+      offsetX: 0,
+      offsetY: 0,
+
+      update: function(){
+        this.dy += this.speedY
+        if (this.dy > 400){
+          this.dy = -this.spriteH
+        }
+      },
+      display: function(){
+        this.sx = Math.floor(this.currentFrame % this.cols) * this.spriteW
+        this.sy = Math.floor(this.currentFrame / this.cols) * this.spriteH
+        this.currentFrame = (this.currentFrame + 1) % this.frames
+      }
+    }
+    let Iceberg = {
+      sx: 0,
+      sy: 257,
+      dx: -10,
+      dy: 0,
+      spriteW: 600,
+      spriteH: 400,
+      //new vars
+      speedY: 0,
+      currentFrame: 0,
+      frames: 1,
+      cols: 1,
+      offsetX: 0,
+      offsetY: 257,
+      sinCounter: 0,
+
+      update: function(){
+        this.dx += Math.sin(this.sinCounter)
+        this.sinCounter+=0.1
+      },
+      display: function(){
+        // this.sx = Math.floor(this.currentFrame % this.cols) * this.spriteW
+        // this.sy = Math.floor(this.currentFrame / this.cols) * this.spriteH
+        // this.currentFrame = (this.currentFrame + 1) % this.frames
+      }
+    }
+
+    let sprites = []
+    for (let i = 0; i < 10; i++) {
+      sprites[i] = Object.create(Elf)
+      sprites[i].dx = Math.random()*580
+      sprites[i].dy = Math.random()*380
+      sprites[i].speedY = Math.random()*3+3
+
+    }
+    let iceberg = Object.create(Iceberg)
+    sprites.unshift(iceberg)
+
+    function draw() {
+      context.clearRect(0, 0, canvas.width, canvas.height)
+      context.drawImage( image, 0, 257, 600, 400, 0, 0, 600, 400)
+      
+      for (let i = 0; i < sprites.length; i++) {
+        sprites[i].update()
+        sprites[i].display()
+        context.drawImage(
+            image,
+            sprites[i].sx, sprites[i].sy, sprites[i].spriteW, sprites[i].spriteH, //source coordinates
+            sprites[i].dx, sprites[i].dy, sprites[i].spriteW, sprites[i].spriteH //destination coords
+        )
+      }
+      window.requestAnimationFrame(draw)
+    }
+    </script>
+</body>
+
+</html>

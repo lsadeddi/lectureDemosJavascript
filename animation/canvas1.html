@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>canvas</title>
+    <style type="text/css">
+    * {
+        margin: 0;
+        padding: 0;
+    }
+
+    canvas {
+        background-color: red;
+    }
+    </style>
+</head>
+
+<body>
+    <canvas id="canvas"></canvas>
+    <script type="text/javascript">
+    const canvas = document.querySelector('#canvas');
+    canvas.width = 600;
+    canvas.height = 400;
+    const context = canvas.getContext('2d');
+    const image = new Image();
+    image.addEventListener('load', draw, false);
+    image.src = 'assets/elf.png';
+
+    let Elf = {
+      sx: 0,
+      sy: 0,
+      dx: Math.random()*580,
+      dy: Math.random()*380,
+      spriteW: 53,
+      spriteH: 63,
+
+      update: function(){
+        this.dy++
+        if (this.dy > 400){
+          this.dy = -this.spriteH
+        }
+      },
+      display: function(){
+
+      }
+    }
+
+    var e1 = Object.create(Elf)
+
+    function draw() {
+      // context.clearRect(0, 0, canvas.width, canvas.height)
+      e1.update()
+      context.drawImage(
+          image,
+          e1.sx, e1.sy, e1.spriteW, e1.spriteH, //source coordinates
+          e1.dx, e1.dy, e1.spriteW, e1.spriteH //destination coords
+      )
+      window.requestAnimationFrame(draw)
+    }
+    </script>
+</body>
+
+</html>

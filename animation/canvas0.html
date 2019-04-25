@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>canvas</title>
+    <style type="text/css">
+    * {
+        margin: 0;
+        padding: 0;
+    }
+
+    canvas {
+        background-color: red;
+    }
+    </style>
+</head>
+
+<body>
+    <canvas id="canvas"></canvas>
+    <script type="text/javascript">
+    const canvas = document.querySelector('#canvas');
+    canvas.width = 300;
+    canvas.height = 200;
+    const context = canvas.getContext('2d');
+    const image = new Image();
+    image.addEventListener('load', draw, false);
+    image.src = 'assets/elf.png';
+
+    function draw() {
+        // context.drawImage(image, 0, 0);
+        context.drawImage(
+            image,
+            159,126,53,63,//source coordinates source x,y,w,h
+            50,50,53,63//destination coords dest x,y,w,h
+            );
+    }
+    </script>
+</body>
+
+</html>
