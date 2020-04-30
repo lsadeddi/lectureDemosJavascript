@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta charset="utf-8">
+  <title>Spritesheet animation method</title>
+  <style media="screen">
+    body{position: relative;}
+    #canvas1 {
+      width: 900px;
+      height: 200px;
+      background-color: rgb(154, 109, 170);
+      /* position: fixed; */
+      z-index: -1;
+      /* top: 1em; */
+      display: block;
+      margin: 1em auto;
+    }
+    .weather{
+      width: 800px;
+      margin: 1em auto;
+      font-family: sans-serif;
+    }
+  </style>
+</head>
+
+<body>
+  <p class="weather"></p>
+  <canvas id="canvas1" width="900" height="200"></canvas>
+  <script src="weatherAPIkey.js" charset="utf-8"></script>
+  <script type="text/javascript">
+  ////Order of events for the code
+  //load images
+  //load textureAtlas JSON using xhrSprites
+  //populate sprite information using named functions
+  //load weather data if needed
+  //start animating
+
+  //////////////////////
+  ////PROTOTYPE OBJECTS
+  ////////////////////////////////////////////
+  ////////////////////////////////////////////
+  //object for sprite artwork info on textureAtlas
+  let SpriteFrame = {
+    x:0,y:0,w:0,h:0
+  }
+
+  //primary sprite set with default values
+  let Sprite = {
+    sx: 0,
+    sy: 0,
+    spriteW: 0,
+    spriteH: 0,
+    dx: 0,
+    dy: 0,
+    vx: 0,
+    vy: 0,
+    currentFrame: 0,
+    frames: 1,
+    frameImages: [],
+    increment: 0,
+    animationSpeed: 1,
+
+    update: function() {
+      //allows for simple horizontal and vertical movement
+      //screen wrap asteroids style
+      //updated to cover all four edges of the screen
+      this.dx += this.vx
+      if (this.dx > canvas.width) {
+        this.dx = -this.spriteW
+      } else if (this.dx < -this.spriteW){
+        this.dx = canvas.width
+      }
+      this.dy += this.vy
+      if (this.dy > canvas.height) {
+        this.dy = -this.spriteH
+      } else if (this.dy < -this.spriteH){
+        this.dy = canvas.height
+      }
+    },
+    display: function() {
+      //only call this on animating sprites
+      if (this.frameImages.length > 0){
+        this.sx = this.frameImages[this.currentFrame].x
+        this.sy = this.frameImages[this.currentFrame].y
+        this.spriteW = this.frameImages[this.currentFrame].w
+        this.spriteH = this.frameImages[this.currentFrame].h
+        this.increment = (this.increment + 1) % this.animationSpeed
+        if (this.increment === 0){
+        this.currentFrame = (this.currentFrame + 1) % this.frames
+        }
+      }
+    }
+  }
+  ////////////////////////////////////////////
+  ////////////////////////////////////////////
+
+
+  //create image file variable reference
+    const atlas = new Image()
+
+    //set path for image files
+    atlas.src = "textureAtlas.png"
+
+    const imageAssetCount = 1
+    let imagesLoaded = 0
+    atlas.addEventListener('load', imageLoadHandler, false)
+
+    function imageLoadHandler() {
+      imagesLoaded++
+      if (imagesLoaded === imageAssetCount) {
+        ////move to next activity
+        xhrSprites.send()
+      }
+    }
+    //load json spriteData
+    let spriteData = {}
+    let xhrSprites = new XMLHttpRequest()
+    xhrSprites.open("GET", 'textureAtlas.json')
+    xhrSprites.responseType = 'text'
+    xhrSprites.onload = event => {
+      if (xhrSprites.status === 200){
+        spriteData = JSON.parse(xhrSprites.responseText)
+        createSprites()
+      }else {
+        console.log("Error code: " + xhrSprites.status);
+      }
+    }
+
+    //create the sprites
+    //animated sprites use Sprite
+    let uni = Object.create(Sprite)
+    //non-animated sprites use SpriteFrame
+    let sky = Object.create(SpriteFrame)
+    let cloud = Object.create(SpriteFrame)
+    let sun = Object.create(SpriteFrame)
+    let moon = Object.create(SpriteFrame)
+
+    //use array to contain the group of same objects
+    let clouds = []
+    let numClouds = 1000
+
+    function createSprites(){
+      // let sunArt = spriteData.frames.find((sprite) => sprite.filename === 'sun.png')
+      // let moonArt = spriteData.frames.find((sprite) => sprite.filename === 'moon.png')
+      //SKY
+      let skyArt = spriteData.frames.find((sprite) => sprite.filename === 'sky.png')
+      sky.sx = skyArt.frame.x
+      sky.sy = skyArt.frame.y
+      sky.spriteW = skyArt.frame.w
+      sky.spriteH = skyArt.frame.h
+
+      //SUN
+      let sunArt = spriteData.frames.find((sprite) => sprite.filename === 'sun.png')
+      sun.sx = sunArt.frame.x
+      sun.sy = sunArt.frame.y
+      sun.spriteW = sunArt.frame.w
+      sun.spriteH = sunArt.frame.h
+
+      //MOON
+      let moonArt = spriteData.frames.find((sprite) => sprite.filename === 'moon.png')
+      moon.sx = moonArt.frame.x
+      moon.sy = moonArt.frame.y
+      moon.spriteW = moonArt.frame.w
+      moon.spriteH = moonArt.frame.h
+
+      //UNICORN
+      let uniFrames = []
+      uni.frameImages = uniFrames
+      uni.frames = 12
+      for (var i = 0; i < uni.frames; i++) {
+        uniFrames[i] = Object.create(SpriteFrame)
+        let str = `${i+1}`.padStart(4,"0")
+        let u = spriteData.frames.find((sprite) => sprite.filename === `UnicornWalk${str}.png`)
+        uniFrames[i].x = u.frame.x
+        uniFrames[i].y = u.frame.y
+        uniFrames[i].w = u.frame.w
+        uniFrames[i].h = u.frame.h
+      }
+      uni.dy = 200 - uniFrames[uni.currentFrame].h//currentFrame is set in object prototype
+      uni.vx = 1
+      uni.animationSpeed = 1
+
+      //CLOUDS
+      let cdArt = spriteData.frames.find((sprite) => sprite.filename === 'cloudD.png')
+      for (var i = 0; i < numClouds; i++){
+        clouds[i] = Object.create(Sprite)
+        clouds[i].sx = cdArt.frame.x
+        clouds[i].sy = cdArt.frame.y
+        clouds[i].spriteW = cdArt.frame.w
+        clouds[i].spriteH = cdArt.frame.h
+        clouds[i].dx = Math.random()*(canvas.width+cdArt.frame.w*2) - cdArt.frame.h
+        clouds[i].dy = Math.random()*(canvas.height-cdArt.frame.h)
+        clouds[i].vx = 0.5
+      }
+
+      //artwork properties are assigned to OBJECTS
+      //time to start animating
+      xhr.send()
+    }
+
+    //////////////////////////////////////////////
+    //GET WEATHER DATA
+    let lat = 45.0959889
+    let lon = -93.3974557
+
+    let p = document.querySelector('p.weather')
+
+    //empty object to hold the JSON data
+    let weather = {};
+    //create the new xhr object
+    let xhr = new XMLHttpRequest();
+    xhr.open("GET", `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=imperial`, true);
+    //set the xhr type
+    xhr.responseType = 'text';
+
+    //use the onload event to verify loading or provide the error response
+    xhr.onload = event => {
+      //verify the data has loaded properly.
+      //200 is success
+      if (xhr.status === 200) {
+        //Copy the JSON file into the weather variable
+        weather = JSON.parse(xhr.responseText)
+        console.log("weather JSON data loaded")
+        console.log(weather)
+
+        console.log("current icon: "+weather.weather[0].icon);
+        console.log("substring: " + weather.weather[0].icon.substring(0,2));
+        displayWeatherInfoText()
+        startAnimating()
+      } else {
+        p.textContent = "Error code: " + xhr.status
+      }
+    }
+    function displayWeatherInfoText(){
+      let str = ""
+      let location = weather.name
+      let temp = Math.round(weather.main.temp)
+      let wind = Math.round(weather.wind.speed)
+      let time = new Date(weather.dt*1000)
+      let hrs = time.getHours()
+      let minutes = time.getMinutes()
+      if (minutes<10){ minutes = `0${minutes}`}
+      let timeString = ""
+      if (hrs==12){
+        timeString = `12:${minutes} PM`
+      }else if (hrs>12){
+        timeString = `${hrs-12}:${minutes} PM`
+      } else if (hrs==0){
+        timeString = `12:${minutes} AM`
+      } else {
+        timeString = `${hrs}:${minutes} AM`
+      }
+      str = `${location}  ${temp}&#0176;  wind: ${wind}mph<br>${time}<br>${timeString}`
+      //sun location will be percent of canvas between sunrise/sunset
+      //sunrise is 10%height. peak is 90%height
+      p.innerHTML = str
+    }
+
+
+    ////////////////////////////////////////////////////////
+    const canvas = document.querySelector('#canvas1')
+    const context = canvas.getContext('2d')
+    canvas.width = 900; //horizontal resolution (?) - increase for better looking text
+    canvas.height = 200; //vertical resolution (?) - increase for better looking text
+    canvas.style.width = 900; //actual width of canvas
+    canvas.style.height = 200; //actual height of canvas
+    const cw = canvas.width
+    const ch = canvas.height
+
+    function startAnimating() {
+      context.clearRect(0, 0, canvas.width, canvas.height)
+      context.textAlign = "center"
+      //DRAW BACKGROUND GRID
+      for (var i = 0; i < 10; i++) {
+        if (i % 2 == 0) {
+          context.fillStyle = 'rgba(0,0,255,0.6)'
+        } else {
+          context.fillStyle = 'rgba(245, 111, 111, 0.9)'
+        }
+        context.fillRect(i * canvas.width / 10, 0, 1, canvas.height)
+        context.fillRect(0, i * canvas.height / 10, canvas.width, 1)
+      }
+
+      ////CALCULATE SUN/MOON POSITION
+      let dt = 1557978533//weather.dt
+      // let dt = weather.dt
+      let sunrise = weather.sys.sunrise
+      let sunset = weather.sys.sunset
+      let ssd = new Date(sunset*1000)
+      let srd = new Date(sunrise*1000)
+      // console.log(`${srd.getHours()}:${srd.getMinutes()}    ${ssd.getHours()}:${ssd.getMinutes()}`);
+      let daytimeSeconds = sunset-sunrise
+      let nighttimeSeconds = 86400-daytimeSeconds//86400 is seconds per day
+
+      //sky hours are 72px wide
+      let time = new Date(weather.dt*1000)
+      let hrs = time.getHours()
+      let daytime = sunrise<dt&&dt<sunset ? true : false
+
+
+      let positionPercentage
+
+      let skyX//day-night sx value
+      let sunMoonDx//destination x position for both sun and moon based on positionPercentage
+      let sunMoonDy//destination y position for both sun and moon based on positionPercentage
+
+      if (daytime){
+        skyX = sky.sx
+        positionPercentage = (dt-sunrise)/daytimeSeconds
+      } else {
+        //NIGHTTIME
+        skyX = sky.sx + 900
+        positionPercentage = (dt-sunset)/nighttimeSeconds
+      }
+      sunMoonDy = positionPercentage<0.5?ch-positionPercentage*ch*2 : 2*(positionPercentage-0.5)*ch
+      sunMoonDx = positionPercentage * cw
+      // console.log("pp "+positionPercentage+"  dx:"+sunMoonDx+"  dy:"+sunMoonDy);
+      // console.log(sunset +"       "+dt);
+      // console.log("nt "+nighttimeSeconds);
+
+      //DRAW SKY
+      context.drawImage(
+        atlas,
+        skyX, sky.sy, sky.spriteW/2, sky.spriteH,
+        0, 0, cw, ch
+      )
+      //DRAW SUN/MOON
+      //dx and dy will be determined by weather data
+      if (daytime){
+        sun.dx = 100
+        sun.dy = 50
+        context.drawImage(
+          atlas,
+          sun.sx, sun.sy, sun.spriteW, sun.spriteH,
+          sunMoonDx, sunMoonDy, sun.spriteW, sun.spriteH
+        )
+      } else {
+        moon.dx = 100
+        moon.dy = 50
+        context.drawImage(
+          atlas,
+          moon.sx, moon.sy, moon.spriteW, moon.spriteH,
+          sunMoonDx, sunMoonDy, moon.spriteW, moon.spriteH
+        )
+      }
+
+
+      //DRAW CLOUDS
+      let numClouds = 10
+      for (var i = 0; i < numClouds; i++) {
+        clouds[i].update()
+        // clouds[i].display()
+        //do not call display because the cloud is not updating
+        if (!daytime){
+          let cn = spriteData.frames.find((sprite) => sprite.filename === 'cloudN.png')
+          clouds[i].sx = cn.frame.x
+          clouds[i].sy = cn.frame.y
+        }
+        context.drawImage(
+          atlas,
+          clouds[i].sx, clouds[i].sy, clouds[i].spriteW, clouds[i].spriteH,
+          clouds[i].dx, clouds[i].dy, clouds[i].spriteW, clouds[i].spriteH
+        )
+      }
+
+      //DRAW UNI
+      context.drawImage(
+        atlas,
+        uni.sx, uni.sy, uni.spriteW, uni.spriteH,
+        uni.dx, uni.dy+8, uni.spriteW, uni.spriteH
+      )
+      uni.update()
+      uni.display()
+
+      //repeat animation cycle
+      requestAnimationFrame(startAnimating)
+
+    }
+  </script>
+</body>
+
+</html>

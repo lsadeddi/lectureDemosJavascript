@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta charset="utf-8">
+  <title></title>
+  <style media="screen">
+    body{position: relative;}
+    #canvas1 {
+      width: 900px;
+      height: 200px;
+      background-color: rgb(154, 109, 170);
+      /* position: fixed; */
+      z-index: -1;
+      /* top: 1em; */
+      display: block;
+      margin: 1em auto;
+    }
+    .weather{
+      width: 800px;
+      margin: 1em auto;
+      font-family: sans-serif;
+    }
+  </style>
+</head>
+
+<body>
+  <p class="weather"></p>
+  <canvas id="canvas1" width="900" height="200"></canvas>
+  <script src="weatherAPIkey.js" charset="utf-8"></script>
+  <script type="text/javascript">
+    //https://codebeautify.org/jsonviewer
+    //https://developer.mozilla.org/en-US/docs/Web/API/Geolocation_API
+    // https://openweathermap.org/weather-conditions
+    // let lat=45, lon=-93 -- approximate location
+
+    //step 1: sign up at openweathermap.org to get API key
+    //step 2: create weatherAPIkey.js file to hold key
+    //step 3: link to weatherAPIkey file
+    //add in switch or if-else for weather codes
+    //build animations and sprites
+    //separate images vs spriteSheet vs textureAtlas
+    //all sprites have the same properties and methods
+    const skyImage = new Image()
+    const sunImage = new Image()
+    const moonImage = new Image()
+    skyImage.src = "sky.png"
+    sunImage.src = "sun.png"
+    moonImage.src = "moon.png"
+
+    const imageAssetCount = 3
+    let imagesLoaded = 0
+
+    skyImage.addEventListener('load', imageLoadHandler, false)
+    sunImage.addEventListener('load', imageLoadHandler, false)
+    moonImage.addEventListener('load', imageLoadHandler, false)
+
+    function imageLoadHandler(){
+      imagesLoaded ++
+      if (imagesLoaded === imageAssetCount){
+        xhr.send()
+      }
+    }
+
+
+    let lat, lon
+    let p = document.querySelector('p.weather')
+
+    //new empty object to hold the JSON data
+    let weather = {};
+    //create the new xhr object
+    let xhr = new XMLHttpRequest();
+    //use XHR to get the json data from the server
+    // xhr.open("GET", `https://api.openweathermap.org/data/2.5/weather?zip=55445,us&appid=${apiKey}&units=imperial`, true);
+    xhr.open("GET", `https://api.openweathermap.org/data/2.5/weather?lat=45.0958958&lon=-93.3971838&appid=${apiKey}&units=imperial`, true);
+    //set the xhr data type
+    xhr.responseType = 'text';
+
+    //use the onload event to verify loading or provide the error response
+    xhr.onload = event => {
+      //verify the data has loaded properly.
+      //200 is success
+      if (xhr.status === 200) {
+        //Copy the JSON file into the weather variable
+        weather = JSON.parse(xhr.responseText)
+        console.log("JSON data loaded into object")
+        console.log(weather)
+
+        let str = ""
+        let location = weather.name//name
+        let temp = Math.round(weather.main.temp)
+        let wind = Math.round(weather.wind.speed)
+        let time = new Date(weather.dt*1000)
+        let hrs = time.getHours()
+        let minutes = time.getMinutes()
+
+        if (minutes < 10) {
+          minutes = `0${minutes}`
+        }
+        let timeString = ""
+        if (hrs == 12) {
+          timeString = `12:${minutes} PM`
+        } else if (hrs > 12) {
+          timeString = `${hrs-12}:${minutes} PM`
+        } else if (hrs == 0) {
+          timeString = `12:${minutes} AM`
+        } else {
+          timeString = `${hrs}:${minutes} AM`
+        }
+        str = `${location}  ${temp}&#0176;  wind: ${wind} mph<br>${time}<br>${timeString}`
+
+        p.innerHTML = str
+
+        plot()
+      } else {
+        p.textContent = "Error code: " + xhr.status
+      }
+    }
+
+    // xhr.send()
+
+    const canvas = document.querySelector('#canvas1')
+    const context = canvas.getContext('2d')
+    canvas.width = 900; //horizontal resolution (?) - increase for better looking text
+    canvas.height = 200; //vertical resolution (?) - increase for better looking text
+    canvas.style.width = 900; //actual width of canvas
+    canvas.style.height = 200; //actual height of canvas
+
+    function plot(){
+      context.clearRect(0, 0, canvas.width, canvas.height)
+      context.textAlign = "center"
+      //draw background grid
+      for (var i = 0; i < 10; i++) {
+        if (i % 2 == 0) {
+          context.fillStyle = 'rgba(0,0,255,0.6)'
+        } else {
+          context.fillStyle = 'rgba(245, 111, 111, 0.9)'
+        }
+        context.fillRect(i * canvas.width/10, 0, 1, canvas.height)
+        context.fillRect(0, i * canvas.height/10, canvas.width, 1)
+      }
+
+      //calc the time and sun position
+      const dt = weather.dt
+      const sunrise = weather.sys.sunrise
+      const sunset = weather.sys.sunset
+      console.log("dt: "+dt+"  sr: "+sunrise+"  ss: "+sunset);
+      // let ssd = new Date(sunset*1000)
+      // let srd = new Date(sunrise*1000)
+      // console.log(`${srd.getHours()}:${srd.getMinutes()}    ${ssd.getHours()}:${ssd.getMinutes()}`);
+      let daytime // = sunrise < dt && dt < sunset ? true : false
+      let skyX
+      let sunMoon
+      if (sunrise < dt && dt < sunset){
+        daytime = true
+        skyX = 0
+        sunMoon = sunImage
+      } else {
+        daytime = false
+        skyX = 900
+        sunMoon = moonImage
+      }
+      let positionPercentage
+
+      if (daytime){
+        positionPercentage = (dt-sunrise)/(sunset-sunrise)
+      } else {
+        positionPercentage = (dt-sunset)/(sunset-sunrise)
+      }
+      // positionPercentage = 0.4
+
+      const cw = canvas.width
+      const ch = canvas.height
+      //draw sky
+      context.drawImage(
+        skyImage,
+        skyX,0,900,200,
+        0,0,cw,ch
+      )
+
+      //draw sun
+      let sunDx = cw * positionPercentage
+      let sunDy = 0
+      if (positionPercentage < 0.5){
+        sunDy = ch - ch * positionPercentage * 2
+      } else {
+        sunDy = ch * (positionPercentage-0.5) * 2
+      }
+      context.drawImage(
+        sunMoon,
+        0,0,100,100,
+        sunDx,sunDy,100,100
+      )
+
+
+      // requestAnimationFrame(plot)
+
+    }
+  </script>
+</body>
+
+
+
+
+
+
+
+
+
+
+
+</html>

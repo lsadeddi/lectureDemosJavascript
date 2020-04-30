@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>geolocation</title>
+    <style media="screen">
+    body{
+      background: grey;
+      margin-left: 200px;
+    }
+    p {
+      font-family: sans-serif;
+    }
+      #weatherBug{
+        border: 6px solid rgb(255, 19, 224);
+        border-radius: 1em;
+        background-color: purple;
+        width: 14em;
+        padding: 1em;
+        color: white;
+
+      }
+    </style>
+  </head>
+  <body>
+    <button id = "find-me">Show my location</button><br/>
+    <p id = "status">Location: unknown</p>
+    <div id="weatherBug">
+      <h1>Weather Bug</h1>
+      <p>No Weather Data</p>
+    </div>
+    <script src="weatherAPIkey.js" charset="utf-8"></script>
+    <script type="text/javascript">
+    document.querySelector('#find-me').addEventListener('click', geoFindMe);
+
+    function geoFindMe() {
+      const status = document.querySelector('#status');
+
+      function success(position) {
+        const latitude  = position.coords.latitude;
+        const longitude = position.coords.longitude;
+        setWeather(latitude,longitude)
+        status.textContent = `Location: lat: ${latitude}, lon: ${longitude}`;
+      }
+
+      function error() {
+        status.textContent = 'Unable to retrieve your location';
+      }
+
+      if (!navigator.geolocation) {
+        status.textContent = 'Geolocation is not supported by your browser';
+      } else {
+        status.textContent = 'Locating…';
+        //requires https of course so it must be live or in chrome
+        navigator.geolocation.getCurrentPosition(success, error);
+      }
+    }//end geoFindMe
+
+    /////////////////////////////
+    /////////////////////////////
+    function setWeather(latitude, longitude){
+      let p = document.querySelector('#weatherBug p')
+      let lat = latitude
+      let lon = longitude
+      let weather = {}
+      let xhr = new XMLHttpRequest()
+      // xhr.open("GET", `https://api.openweathermap.org/data/2.5/weather?zip=55129,us&appid=${apiKey}&units=imperial`,true)
+      xhr.open("GET", `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=imperial`, true);
+      xhr.responseType = 'text'
+
+      xhr.addEventListener('load', function(){
+        if(xhr.status ===200){
+          weather = JSON.parse(xhr.responseText)
+          console.log(weather);
+          // p.textContent = `${weather.name}`
+          populateText(weather,p)
+        }else{
+          p.textContent = "error: " + xhr.status
+        }
+      },false)
+
+
+      xhr.send()
+
+    }//end setWeather
+
+    function populateText(weather,p){
+      let str = ""
+      let location = weather.name//name
+      let temp = Math.round(weather.main.temp)
+      let wind = Math.round(weather.wind.speed)
+      let time = new Date(weather.dt*1000)
+      let hrs = time.getHours()
+      let minutes = time.getMinutes()
+
+      if (minutes < 10) {
+        minutes = `0${minutes}`
+      }
+      let timeString = ""
+      if (hrs == 12) {
+        timeString = `12:${minutes} PM`
+      } else if (hrs > 12) {
+        timeString = `${hrs-12}:${minutes} PM`
+      } else if (hrs == 0) {
+        timeString = `12:${minutes} AM`
+      } else {
+        timeString = `${hrs}:${minutes} AM`
+      }
+      str = `${location}  ${temp}&#0176;<br>wind: ${wind} mph<br>${timeString}`
+      p.innerHTML = str
+
+    }//populateText
+
+    </script>
+  </body>
+</html>

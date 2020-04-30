@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta charset="utf-8">
+  <title>Spritesheet animation method</title>
+  <style media="screen">
+    body{position: relative;}
+    #canvas1 {
+      width: 900px;
+      height: 200px;
+      background-color: rgb(154, 109, 170);
+      /* position: fixed; */
+      z-index: -1;
+      /* top: 1em; */
+      display: block;
+      margin: 1em auto;
+    }
+    .weather{
+      width: 800px;
+      margin: 1em auto;
+      font-family: sans-serif;
+    }
+  </style>
+</head>
+
+<body>
+  <p class="weather"></p>
+  <canvas id="canvas1" width="900" height="200"></canvas>
+  <script type="text/javascript">
+
+  //create image file variable reference
+    const skyImage = new Image()
+    const uniImage = new Image()
+    const cloudImage = new Image()
+    //set path for image files
+    skyImage.src = "sky.png"
+    cloudImage.src = "cloudN.png"
+    uniImage.src = "unicorn050719.png"
+
+    const imageAssetCount = 3
+    let imagesLoaded = 0
+    skyImage.addEventListener('load', imageLoadHandler, false)
+    cloudImage.addEventListener('load', imageLoadHandler, false)
+    uniImage.addEventListener('load', imageLoadHandler, false)
+
+    function imageLoadHandler() {
+      imagesLoaded++
+      if (imagesLoaded === imageAssetCount) {
+        ////move to next activity
+        startAnimating()
+      }
+    }
+
+    ////////////////////////////////////////////
+    ////////////////////////////////////////////
+    //primary sprite set with default values
+    let Sprite = {
+      sx: 0,
+      sy: 0,
+      spriteW: 0,
+      spriteH: 0,
+      dx: 0,
+      dy: 0,
+      vx: 0,
+      vy: 0,
+      currentFrame: 0,
+      frames: 1,
+      cols: 1,
+
+      update: function() {
+        //allows for simple horizontal and vertical movement
+        //screen wrap asteroids style
+        //updated to cover all four edges of the screen
+        this.dx += this.vx
+        if (this.dx > canvas.width) {
+          this.dx = -this.spriteW
+        } else if (this.dx < -this.spriteW){
+          this.dx = canvas.width
+        }
+        this.dy += this.vy
+        if (this.dy > canvas.height) {
+          this.dy = -this.spriteH
+        } else if (this.dy < -this.spriteH){
+          this.dy = canvas.height
+        }
+      },
+      display: function() {
+        //this requires a spriteSheet for artwork with each
+        //frame on the spritesheet to be the SAME SIZE
+        //If the artwork is only a single frame, this code still works
+        this.sx = Math.floor(this.currentFrame % this.cols) * this.spriteW
+        this.sy = Math.floor(this.currentFrame / this.cols) * this.spriteH
+        this.currentFrame = this.currentFrame + 1
+        if (this.currentFrame == this.frames) {
+          this.currentFrame = 0
+        }
+        // this.currentFrame = (this.currentFrame + 1) % this.frames
+      }
+    }
+    ////////////////////////////////////////////
+    ////////////////////////////////////////////
+    //new sprite objects only need to declare properties they are using
+    let uni = Object.create(Sprite)
+    uni.spriteW = 177
+    uni.spriteH = 98
+    uni.dy = 200 - uni.spriteH
+    uni.frames = 12
+    uni.cols = 2
+    uni.vx = 1
+
+    let clouds = []
+    for (var i = 0; i < 100; i++) {
+      clouds[i] = Object.create(Sprite)
+      //because the cloud is a single frame
+      //it doesn't need to declare frames and cols
+      clouds[i].spriteW = 100
+      clouds[i].spriteH = 69
+      clouds[i].dx = Math.random()*900
+      clouds[i].dy = Math.random()*140
+      clouds[i].vx = -1
+    }
+
+
+    const canvas = document.querySelector('#canvas1')
+    const context = canvas.getContext('2d')
+    canvas.width = 900; //horizontal resolution (?) - increase for better looking text
+    canvas.height = 200; //vertical resolution (?) - increase for better looking text
+    canvas.style.width = 900; //actual width of canvas
+    canvas.style.height = 200; //actual height of canvas
+    const cw = canvas.width
+    const ch = canvas.height
+
+    function startAnimating() {
+      context.clearRect(0, 0, canvas.width, canvas.height)
+      context.textAlign = "center"
+      //draw background grid
+      for (var i = 0; i < 10; i++) {
+        if (i % 2 == 0) {
+          context.fillStyle = 'rgba(0,0,255,0.6)'
+        } else {
+          context.fillStyle = 'rgba(245, 111, 111, 0.9)'
+        }
+        context.fillRect(i * canvas.width / 10, 0, 1, canvas.height)
+        context.fillRect(0, i * canvas.height / 10, canvas.width, 1)
+      }
+
+      //draw sky
+      context.drawImage(
+        skyImage,
+        0, 0, 900, 200,
+        0, 0, cw, ch
+      )
+
+      //draw numClouds
+      let numClouds = 10
+      for (var i = 0; i < numClouds; i++) {
+        clouds[i].update()
+        //no need to call display because the cloud is not updating
+        context.drawImage(
+          cloudImage,
+          clouds[i].sx, clouds[i].sy, clouds[i].spriteW, clouds[i].spriteH,
+          clouds[i].dx, clouds[i].dy-20, clouds[i].spriteW, clouds[i].spriteH
+        )
+      }
+
+      //draw uni
+      context.drawImage(
+        uniImage,
+        uni.sx, uni.sy, uni.spriteW, uni.spriteH,
+        uni.dx, uni.dy+8, uni.spriteW, uni.spriteH
+      )
+      uni.update()
+      uni.display()
+      requestAnimationFrame(startAnimating)
+
+    }
+  </script>
+</body>
+
+</html>
