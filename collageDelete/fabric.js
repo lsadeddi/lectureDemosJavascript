@@ -16798,10 +16798,7 @@ fabric.util.object.extend(fabric.Object.prototype, /** @lends fabric.Object.prot
    *
    * As string — one property
    *
-   * object.animate('left', ...);
-   * object.animate('left', { duration: ... });
-   *
-   */
+   * object.an
   animate: function() {
     if (arguments[0] && typeof arguments[0] === 'object') {
       var propsToAnimate = [], prop, skipCallbacks;
@@ -27685,10 +27682,7 @@ fabric.Image.filters.BaseFilter.fromObject = function(object, callback) {
         p.y = maxHeight;
       }
 
-      // add canvas offset on document
-      p.x += this.canvas._offset.left;
-      p.y += this.canvas._offset.top;
-
+      // add canvas offset on documen
       return { left: p.x + 'px', top: p.y + 'px', fontSize: charHeight + 'px', charHeight: charHeight };
     },
 
@@ -29836,3 +29830,9 @@ fabric.util.object.extend(fabric.IText.prototype, /** @lends fabric.IText.protot
   }
 })();
 
+t
+      p.x += this.canvas._offset.left;
+      p.y += this.canvas._offset.top;imate('left', ...);
+   * object.animate('left', { duration: ... });
+   *
+   */
